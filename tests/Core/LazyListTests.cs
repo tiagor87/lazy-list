@@ -9,28 +9,20 @@ namespace LazyList.Tests.Core
     public class LazyListTests
     {
         private readonly Mock<ILazyLoadResolver> _lazyLoadResolverMock;
-        private readonly LazyLoadFactory _lazyLoadFactory;
 
         public LazyListTests()
         {
             _lazyLoadResolverMock = new Mock<ILazyLoadResolver>();
-            _lazyLoadFactory = new LazyLoadFactory(new[]
-            {
-                _lazyLoadResolverMock.Object
-            }); 
         }
         
         [Fact]
         public void GivenLazyListWhenLoadShouldNotFailIfLazyParameterIsNull()
         {
-            _lazyLoadResolverMock.SetupGet(x => x.ResolveType)
-                .Returns(typeof(IEnumerable<Stub>))
-                .Verifiable();
             _lazyLoadResolverMock.Setup(x => x.Resolve(It.IsAny<LazyLoadParameter>()))
                 .Returns(new[] {new Stub(), new Stub()})
                 .Verifiable();
             
-            var lazyList = new LazyList<Stub>(_lazyLoadFactory, null);
+            var lazyList = new LazyList<Stub>(_lazyLoadResolverMock.Object, null);
             lazyList.Should().HaveCount(2);
             
             _lazyLoadResolverMock.VerifyAll();
@@ -39,7 +31,7 @@ namespace LazyList.Tests.Core
         [Fact]
         public void GivenLazyListWhenAddShouldNotLoad()
         {
-            var lazyList = new LazyList<Stub>(_lazyLoadFactory);
+            var lazyList = new LazyList<Stub>(_lazyLoadResolverMock.Object);
             lazyList.Add(new Stub());
             
             _lazyLoadResolverMock.Verify(x => x.Resolve(It.IsAny<LazyLoadParameter>()), Times.Never());
@@ -48,14 +40,11 @@ namespace LazyList.Tests.Core
         [Fact]
         public void GivenLazyListWhenLoadAfterAddShouldBeAddedLast()
         {
-            _lazyLoadResolverMock.SetupGet(x => x.ResolveType)
-                .Returns(typeof(IEnumerable<Stub>))
-                .Verifiable();
             _lazyLoadResolverMock.Setup(x => x.Resolve(It.IsAny<LazyLoadParameter>()))
                 .Returns(new[] {new Stub(), new Stub()})
                 .Verifiable();
             
-            var lazyList = new LazyList<Stub>(_lazyLoadFactory);
+            var lazyList = new LazyList<Stub>(_lazyLoadResolverMock.Object);
             var stub = new Stub();
             lazyList.Add(stub);
 
@@ -67,14 +56,11 @@ namespace LazyList.Tests.Core
         [Fact]
         public void GivenLazyListWhenGetIndexShouldLoad()
         {
-            _lazyLoadResolverMock.SetupGet(x => x.ResolveType)
-                .Returns(typeof(IEnumerable<Stub>))
-                .Verifiable();
             _lazyLoadResolverMock.Setup(x => x.Resolve(It.IsAny<LazyLoadParameter>()))
                 .Returns(new[] {new Stub(), new Stub()})
                 .Verifiable();
             
-            var lazyList = new LazyList<Stub>(_lazyLoadFactory);
+            var lazyList = new LazyList<Stub>(_lazyLoadResolverMock.Object);
 
             lazyList[0].Should().NotBeNull();
             _lazyLoadResolverMock.VerifyAll();
@@ -83,14 +69,11 @@ namespace LazyList.Tests.Core
         [Fact]
         public void GivenLazyListWhenSetIndexShouldLoad()
         {
-            _lazyLoadResolverMock.SetupGet(x => x.ResolveType)
-                .Returns(typeof(IEnumerable<Stub>))
-                .Verifiable();
             _lazyLoadResolverMock.Setup(x => x.Resolve(It.IsAny<LazyLoadParameter>()))
                 .Returns(new[] {new Stub(), new Stub()})
                 .Verifiable();
             
-            var lazyList = new LazyList<Stub>(_lazyLoadFactory);
+            var lazyList = new LazyList<Stub>(_lazyLoadResolverMock.Object);
             lazyList[0] = new Stub();
             
             _lazyLoadResolverMock.VerifyAll();
@@ -99,14 +82,11 @@ namespace LazyList.Tests.Core
         [Fact]
         public void GivenLazyListWhenGetEnumeratorShouldLoad()
         {
-            _lazyLoadResolverMock.SetupGet(x => x.ResolveType)
-                .Returns(typeof(IEnumerable<Stub>))
-                .Verifiable();
             _lazyLoadResolverMock.Setup(x => x.Resolve(It.IsAny<LazyLoadParameter>()))
                 .Returns(new[] {new Stub(), new Stub()})
                 .Verifiable();
             
-            var lazyList = new LazyList<Stub>(_lazyLoadFactory);
+            var lazyList = new LazyList<Stub>(_lazyLoadResolverMock.Object);
 
             lazyList.GetEnumerator().Should().NotBeNull();
             _lazyLoadResolverMock.VerifyAll();
@@ -115,14 +95,11 @@ namespace LazyList.Tests.Core
         [Fact]
         public void GivenLazyListWhenClearShouldLoad()
         {
-            _lazyLoadResolverMock.SetupGet(x => x.ResolveType)
-                .Returns(typeof(IEnumerable<Stub>))
-                .Verifiable();
             _lazyLoadResolverMock.Setup(x => x.Resolve(It.IsAny<LazyLoadParameter>()))
                 .Returns(new[] {new Stub(), new Stub()})
                 .Verifiable();
             
-            var lazyList = new LazyList<Stub>(_lazyLoadFactory);
+            var lazyList = new LazyList<Stub>(_lazyLoadResolverMock.Object);
             lazyList.Clear();
 
             _lazyLoadResolverMock.VerifyAll();
@@ -132,14 +109,11 @@ namespace LazyList.Tests.Core
         public void GivenLazyListWhenContainsShouldLoad()
         {
             var stub = new Stub();
-            _lazyLoadResolverMock.SetupGet(x => x.ResolveType)
-                .Returns(typeof(IEnumerable<Stub>))
-                .Verifiable();
             _lazyLoadResolverMock.Setup(x => x.Resolve(It.IsAny<LazyLoadParameter>()))
                 .Returns(new[] { stub })
                 .Verifiable();
             
-            var lazyList = new LazyList<Stub>(_lazyLoadFactory);
+            var lazyList = new LazyList<Stub>(_lazyLoadResolverMock.Object);
 
             lazyList.Contains(stub).Should().BeTrue();
             _lazyLoadResolverMock.VerifyAll();
@@ -149,14 +123,11 @@ namespace LazyList.Tests.Core
         public void GivenLazyListWhenIndexOfShouldLoad()
         {
             var stub = new Stub();
-            _lazyLoadResolverMock.SetupGet(x => x.ResolveType)
-                .Returns(typeof(IEnumerable<Stub>))
-                .Verifiable();
             _lazyLoadResolverMock.Setup(x => x.Resolve(It.IsAny<LazyLoadParameter>()))
                 .Returns(new[] { stub })
                 .Verifiable();
             
-            var lazyList = new LazyList<Stub>(_lazyLoadFactory);
+            var lazyList = new LazyList<Stub>(_lazyLoadResolverMock.Object);
 
             lazyList.IndexOf(stub).Should().Be(0);
             _lazyLoadResolverMock.VerifyAll();
@@ -165,14 +136,11 @@ namespace LazyList.Tests.Core
         [Fact]
         public void GivenLazyListWhenCopyToShouldLoad()
         {
-            _lazyLoadResolverMock.SetupGet(x => x.ResolveType)
-                .Returns(typeof(IEnumerable<Stub>))
-                .Verifiable();
             _lazyLoadResolverMock.Setup(x => x.Resolve(It.IsAny<LazyLoadParameter>()))
                 .Returns(new[] {new Stub(), new Stub()})
                 .Verifiable();
             
-            var lazyList = new LazyList<Stub>(_lazyLoadFactory);
+            var lazyList = new LazyList<Stub>(_lazyLoadResolverMock.Object);
             var list = new Stub[2];
             lazyList.CopyTo(list, 0);
 
@@ -184,14 +152,11 @@ namespace LazyList.Tests.Core
         public void GivenLazyListWhenRemoveShouldLoad()
         {
             var stub = new Stub();
-            _lazyLoadResolverMock.SetupGet(x => x.ResolveType)
-                .Returns(typeof(IEnumerable<Stub>))
-                .Verifiable();
             _lazyLoadResolverMock.Setup(x => x.Resolve(It.IsAny<LazyLoadParameter>()))
                 .Returns(new[] { stub })
                 .Verifiable();
             
-            var lazyList = new LazyList<Stub>(_lazyLoadFactory);
+            var lazyList = new LazyList<Stub>(_lazyLoadResolverMock.Object);
             lazyList.Remove(stub);
 
             lazyList.Should().BeEmpty();
@@ -201,14 +166,11 @@ namespace LazyList.Tests.Core
         [Fact]
         public void GivenLazyListWhenInsertShouldLoad()
         {
-            _lazyLoadResolverMock.SetupGet(x => x.ResolveType)
-                .Returns(typeof(IEnumerable<Stub>))
-                .Verifiable();
             _lazyLoadResolverMock.Setup(x => x.Resolve(It.IsAny<LazyLoadParameter>()))
                 .Returns(new[] { new Stub(), new Stub() })
                 .Verifiable();
             
-            var lazyList = new LazyList<Stub>(_lazyLoadFactory);
+            var lazyList = new LazyList<Stub>(_lazyLoadResolverMock.Object);
             var stub = new Stub();
             lazyList.Insert(1, stub);
 
@@ -219,14 +181,11 @@ namespace LazyList.Tests.Core
         [Fact]
         public void GivenLazyListWhenRemoveAtShouldLoad()
         {
-            _lazyLoadResolverMock.SetupGet(x => x.ResolveType)
-                .Returns(typeof(IEnumerable<Stub>))
-                .Verifiable();
             _lazyLoadResolverMock.Setup(x => x.Resolve(It.IsAny<LazyLoadParameter>()))
                 .Returns(new[] { new Stub(), new Stub() })
                 .Verifiable();
             
-            var lazyList = new LazyList<Stub>(_lazyLoadFactory);
+            var lazyList = new LazyList<Stub>(_lazyLoadResolverMock.Object);
             lazyList.RemoveAt(0);
                 
             lazyList.Should().HaveCount(1);

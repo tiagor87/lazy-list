@@ -18,13 +18,14 @@ namespace LazyList.Tests.Core
         [Fact]
         public void GivenServiceCollectionWhenAddResolversShouldScanAssemblies()
         {
-            _servicesMock.Setup(x => x.Add(It.Is<ServiceDescriptor>(descriptor => descriptor.ServiceType == typeof(ILazyLoadResolver) && descriptor.ImplementationType == typeof(ExpressionLazyLoadResolver<>))))
+            _servicesMock.Setup(x => x.Add(It.IsAny<ServiceDescriptor>()))
                 .Verifiable();
             var services = _servicesMock.Object;
             
             services.AddResolvers(typeof(StubLazyLoadResolver).Assembly);
             
-            _servicesMock.Verify(x => x.Add(It.IsAny<ServiceDescriptor>()), Times.Exactly(2));
+            _servicesMock.Verify(x => x.Add(It.Is<ServiceDescriptor>(descriptor => descriptor.ServiceType == typeof(ILazyLoadResolver))), Times.Exactly(2));
+            _servicesMock.Verify(x => x.Add(It.Is<ServiceDescriptor>(descriptor => descriptor.ServiceType == typeof(ILazyLoadListFactory))), Times.Once());
         }
     }
 }

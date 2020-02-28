@@ -8,12 +8,12 @@ namespace LazyList.Core
         private object _sync = new object();
         private bool _isLoaded;
         private readonly List<T> _list;
-        private readonly LazyLoadFactory _factory;
+        private readonly ILazyLoadResolver _resolver;
         private readonly LazyLoadParameter _parameter;
 
-        public LazyList(LazyLoadFactory factory, LazyLoadParameter parameter = null)
+        public LazyList(ILazyLoadResolver resolver, LazyLoadParameter parameter = null)
         {
-            _factory = factory;
+            _resolver = resolver;
             _parameter = parameter ?? LazyLoadParameter.Null;
             _list = new List<T>();
             _isLoaded = false;
@@ -102,11 +102,11 @@ namespace LazyList.Core
 
         private void LoadData()
         {
-            if (_isLoaded) return;
+            if (_isLoaded || _resolver == null) return;
             lock (_sync)
             {
                 if (_isLoaded) return;
-                var list = _factory.Resolve<IEnumerable<T>>(_parameter);
+                var list = (IEnumerable<T>) _resolver.Resolve(_parameter);
                 _list.InsertRange(0, list);
                 _isLoaded = true;
             }
