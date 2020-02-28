@@ -8,12 +8,12 @@ using Xunit;
 
 namespace LazyList.Tests.Core
 {
-    public class LazyLoadResolverTests
+    public class ExpressionLazyLoadResolverTests
     {
         [Fact]
         public void GivenLazyResolverWhenResolveAndParameterNullShouldThrow()
         {
-            var resolver = new LazyLoadResolver<string>(() => Task.FromResult(string.Empty));
+            var resolver = new ExpressionLazyLoadResolver<string>((_) => Task.FromResult(string.Empty));
             Func<object> action = () => resolver.Resolve(null);
             action.Should().Throw<ArgumentNullException>();
         }
@@ -21,7 +21,7 @@ namespace LazyList.Tests.Core
         [Fact]
         public async Task GivenLazyLoadWhenResolveInParallelTasksShouldReturnSameInstance()
         {
-            var resolver = new LazyLoadResolver<Stub>(() => Task.FromResult(new Stub()));
+            var resolver = new ExpressionLazyLoadResolver<Stub>((_) => Task.FromResult(new Stub()));
             var tasks = new List<Task<object>>();
             for (var i = 0; i < 10000; i++)
             {
