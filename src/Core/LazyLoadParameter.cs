@@ -1,4 +1,6 @@
-﻿namespace LazyList.Core
+﻿using System;
+
+namespace LazyList.Core
 {
     public class LazyLoadParameter
     {
@@ -12,8 +14,8 @@
         public static LazyLoadParameter Null => new LazyLoadParameter(null);
         
         public static implicit operator LazyLoadParameter(int value) => new LazyLoadParameter(value);
-        public static implicit operator LazyLoadParameter(string value) => new LazyLoadParameter(value);
         public static implicit operator LazyLoadParameter(long value) => new LazyLoadParameter(value);
+        public static implicit operator LazyLoadParameter(string value) => new LazyLoadParameter(value);
 
         public override bool Equals(object obj)
         {

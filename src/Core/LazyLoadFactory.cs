@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace LazyList.Core
 {
-    public class LazyLoadFactory
+    public class LazyLoadFactory : ILazyLoadFactory
     {
         private readonly IReadOnlyList<ILazyLoadResolver> _resolvers;
 
