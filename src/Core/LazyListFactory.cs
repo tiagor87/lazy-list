@@ -25,7 +25,7 @@ namespace LazyList.Core
         {
             if (_serviceProvider == null) throw new InvalidOperationException("Service Provider is required to execute static creation. Call Init method on Startup.");
             
-            var factory = _serviceProvider.GetService<ILazyListFactory>();
+            var factory = _serviceProvider.GetRequiredService<ILazyListFactory>();
             return factory.Create<T>(parameter);
         }
 

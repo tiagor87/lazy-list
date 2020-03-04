@@ -75,5 +75,19 @@ namespace LazyList.Tests.Core
 
             action.Should().Throw<InvalidOperationException>();
         }
+        
+        [Fact]
+        public void GivenLazyListFactoryWhenStaticCreateAndFactoryNotRegisteredShouldThrow()
+        {
+            var serviceProvider = new Mock<IServiceProvider>();
+            serviceProvider.Setup(x => x.GetService(typeof(ILazyListFactory)))
+                .Returns(null)
+                .Verifiable();
+            
+            LazyListFactory.Init(serviceProvider.Object);
+            Func<IList<Stub>> action = () => LazyListFactory.CreateList<Stub>(1);
+
+            action.Should().Throw<InvalidOperationException>();
+        }
     }
 }
