@@ -2,7 +2,7 @@
 
 namespace LazyList.Core
 {
-    public interface ILazyLoadListFactory
+    public interface ILazyListFactory
     {
         IList<T> Create<T>(LazyLoadParameter parameter);
     }

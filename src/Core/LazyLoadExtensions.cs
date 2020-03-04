@@ -17,7 +17,7 @@ namespace LazyList.Core
                 services.AddScoped(typeof(ILazyLoadResolver), resolver);
             }
 
-            services.AddScoped<ILazyLoadListFactory, LazyListFactory>();
+            services.AddScoped<ILazyListFactory, LazyListFactory>();
         }
     }
 }

@@ -25,7 +25,7 @@ namespace LazyList.Tests.Core
             services.AddResolvers(typeof(StubLazyLoadResolver).Assembly);
             
             _servicesMock.Verify(x => x.Add(It.Is<ServiceDescriptor>(descriptor => descriptor.ServiceType == typeof(ILazyLoadResolver))), Times.Exactly(2));
-            _servicesMock.Verify(x => x.Add(It.Is<ServiceDescriptor>(descriptor => descriptor.ServiceType == typeof(ILazyLoadListFactory))), Times.Once());
+            _servicesMock.Verify(x => x.Add(It.Is<ServiceDescriptor>(descriptor => descriptor.ServiceType == typeof(ILazyListFactory))), Times.Once());
         }
     }
 }

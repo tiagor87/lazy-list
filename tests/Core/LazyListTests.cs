@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using FluentAssertions;
+﻿using FluentAssertions;
 using LazyList.Core;
 using Moq;
 using Xunit;
@@ -118,7 +117,7 @@ namespace LazyList.Tests.Core
             lazyList.Contains(stub).Should().BeTrue();
             _lazyLoadResolverMock.VerifyAll();
         }
-        
+
         [Fact]
         public void GivenLazyListWhenIndexOfShouldLoad()
         {
