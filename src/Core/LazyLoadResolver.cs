@@ -5,14 +5,14 @@ using System.Threading.Tasks;
 
 namespace LazyList.Core
 {
-    public abstract class LazyLoadResolver<T> : ILazyLoadResolver where T : class
+    public abstract class LazyLoadResolver : ILazyLoadResolver
     {
         private static readonly object _sync = new object();
         private readonly IDictionary<LazyLoadParameter, object> _resolvedObjects;
 
-        protected LazyLoadResolver()
+        protected LazyLoadResolver(Type resolveType)
         {
-            ResolveType = typeof(T);
+            ResolveType = resolveType;
             _resolvedObjects = new ConcurrentDictionary<LazyLoadParameter, object>();
         }
 
@@ -34,6 +34,6 @@ namespace LazyList.Core
             return ResolveAsync(parameter).GetAwaiter().GetResult();
         }
 
-        protected abstract Task<T> LoadAsync(LazyLoadParameter parameter);
+        protected abstract Task<object> LoadAsync(LazyLoadParameter parameter);
     }
 }

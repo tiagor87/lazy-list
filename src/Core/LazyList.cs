@@ -5,7 +5,7 @@ namespace LazyList.Core
 {
     public class LazyList<T> : IList<T>
     {
-        private object _sync = new object();
+        private readonly object _sync = new object();
         private bool _isLoaded;
         private readonly List<T> _list;
         private readonly ILazyLoadResolver _resolver;
