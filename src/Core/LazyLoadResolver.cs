@@ -24,7 +24,7 @@ namespace LazyList.Core
             {
                 if (_resolvedObjects.TryGetValue(parameter, out var resolved)) return Task.FromResult(resolved);
                 resolved = LoadAsync(parameter).GetAwaiter().GetResult();
-                _resolvedObjects.Add(parameter, resolved);
+                if (resolved != null) _resolvedObjects.Add(parameter, resolved);
                 return Task.FromResult(resolved);
             }
         }
