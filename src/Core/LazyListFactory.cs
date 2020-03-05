@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace LazyList.Core
 {
@@ -26,7 +25,8 @@ namespace LazyList.Core
         {
             if (ServiceProvider == null) throw new InvalidOperationException("Service Provider is required to execute static creation. Call Init method on Startup.");
             
-            var factory = ServiceProvider.GetRequiredService<ILazyListFactory>();
+            var factory = ServiceProvider.GetService(typeof(ILazyListFactory)) as ILazyListFactory;
+            if (factory == null) throw new InvalidOperationException($"The {nameof(ILazyListFactory)} is not registered.");
             return factory.Create<T>(new LazyLoadParameter(parameter));
         }
 

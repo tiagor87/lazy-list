@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using FluentAssertions;
 using LazyList.Core;
+using LazyList.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Xunit;

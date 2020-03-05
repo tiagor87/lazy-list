@@ -17,6 +17,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Core\LazyList.Core.csproj" />
+    <ProjectReference Include="..\..\src\Extensions\LazyList.Extensions.csproj" />
   </ItemGroup>
 
 </Project>
