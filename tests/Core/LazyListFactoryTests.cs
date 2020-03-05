@@ -10,7 +10,8 @@ using Xunit;
 
 namespace LazyList.Tests.Core
 {
-    public class LazyListFactoryTests
+    [CollectionDefinition("LazyListFactory", DisableParallelization = false)]
+    public class LazyListFactoryTests : IDisposable
     {
         private readonly Mock<ILazyLoadResolver> _lazyLoadResolverMock;
         private readonly LazyListFactory _lazyListFactory;
@@ -60,9 +61,9 @@ namespace LazyList.Tests.Core
                 .Returns(_lazyListFactory)
                 .Verifiable();
             
-            LazyListFactory.Init(serviceProvider.Object);
+            LazyListFactory.Init(() => serviceProvider.Object);
             var list = LazyListFactory.CreateList<Stub>(1);
-
+            
             list.Should().NotBeNull();
             list.Should().BeOfType<LazyList<Stub>>();
             serviceProvider.VerifyAll();
@@ -84,10 +85,15 @@ namespace LazyList.Tests.Core
                 .Returns(null)
                 .Verifiable();
             
-            LazyListFactory.Init(serviceProvider.Object);
+            LazyListFactory.Init(() => serviceProvider.Object);
             Func<IList<Stub>> action = () => LazyListFactory.CreateList<Stub>(1);
 
             action.Should().Throw<InvalidOperationException>();
+        }
+
+        public void Dispose()
+        {
+            LazyListFactory.Init(null);
         }
     }
 }

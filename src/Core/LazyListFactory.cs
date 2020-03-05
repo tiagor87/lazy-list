@@ -7,6 +7,7 @@ namespace LazyList.Core
 {
     public class LazyListFactory : ILazyListFactory
     {
+        private static Func<IServiceProvider> _serviceProviderGetter;
         private static IServiceProvider _serviceProvider;
         private readonly IReadOnlyList<ILazyLoadResolver> _resolvers;
 
@@ -23,15 +24,26 @@ namespace LazyList.Core
 
         public static IList<T> CreateList<T>(LazyLoadParameter parameter)
         {
-            if (_serviceProvider == null) throw new InvalidOperationException("Service Provider is required to execute static creation. Call Init method on Startup.");
+            if (ServiceProvider == null) throw new InvalidOperationException("Service Provider is required to execute static creation. Call Init method on Startup.");
             
-            var factory = _serviceProvider.GetRequiredService<ILazyListFactory>();
+            var factory = ServiceProvider.GetRequiredService<ILazyListFactory>();
             return factory.Create<T>(parameter);
         }
 
-        public static void Init(IServiceProvider serviceProvider)
+        public static void Init(Func<IServiceProvider> serviceProviderGetter)
         {
-            _serviceProvider = serviceProvider;
+            _serviceProviderGetter = serviceProviderGetter;
+            _serviceProvider = null;
+        }
+
+        private static IServiceProvider ServiceProvider
+        {
+            get
+            {
+                if (_serviceProvider != null) return _serviceProvider;
+                if (_serviceProviderGetter == null) return null;
+                return _serviceProvider = _serviceProviderGetter();
+            }
         }
     }
 }
