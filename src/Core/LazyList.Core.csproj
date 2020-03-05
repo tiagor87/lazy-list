@@ -1,7 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
     <Title>Lazy List</Title>
     <Authors>tiagor87@gmail.com</Authors>
     <Description>Package to use lazy list with whatever load way</Description>
@@ -9,6 +8,7 @@
     <RepositoryUrl>https://github.com/tiagor87/lazy-list</RepositoryUrl>
     <ProjectGuid>{BEE10007-BE8F-4CBB-B2C8-BDBB1DDDCFEF}</ProjectGuid>
     <DebugType>Full</DebugType>
+    <TargetFrameworks>net461;net472;netstandard2.0;netstandard2.1</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>
