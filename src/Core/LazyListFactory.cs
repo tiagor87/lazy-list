@@ -22,12 +22,12 @@ namespace LazyList.Core
             return new LazyList<T>(resolver, parameter);
         }
 
-        public static IList<T> CreateList<T>(LazyLoadParameter parameter)
+        public static IList<T> CreateList<T>(object parameter)
         {
             if (ServiceProvider == null) throw new InvalidOperationException("Service Provider is required to execute static creation. Call Init method on Startup.");
             
             var factory = ServiceProvider.GetRequiredService<ILazyListFactory>();
-            return factory.Create<T>(parameter);
+            return factory.Create<T>(new LazyLoadParameter(parameter));
         }
 
         public static void Init(Func<IServiceProvider> serviceProviderGetter)
