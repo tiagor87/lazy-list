@@ -9,17 +9,38 @@ namespace LazyList.Extensions
     {
         public static void AddLazyList(this IServiceCollection services, params Assembly[] assemblies)
         {
-            var resolvers = assemblies.Concat(new [] { typeof(ILazyLoadResolver).Assembly })
+            var resolvers = assemblies
                 .SelectMany(x => x.DefinedTypes)
-                .Where(x => typeof(ILazyLoadResolver).IsAssignableFrom(x) && x.IsClass && !x.IsAbstract && x != typeof(ExpressionLazyLoadResolver<>))
+                .Where(x =>
+                    x.IsClass &&
+                    !x.IsAbstract &&
+                    x.GetInterfaces().Any(y => y.IsGenericType && y.GetGenericTypeDefinition() == typeof(ILazyLoadResolver<>)))
                 .ToList();
             foreach (var resolver in resolvers)
             {
-                services.AddScoped(typeof(ILazyLoadResolver), resolver);
+                if (resolver.GenericTypeParameters.Any())
+                {
+                    services.AddScoped(typeof(ILazyLoadResolver<>), resolver);
+                }
+                else
+                {
+                    var interfaces = resolver.GetInterfaces().Where(x => x.GetGenericTypeDefinition() == typeof(ILazyLoadResolver<>))
+                        .ToList();
+                    foreach (var interfaceType in interfaces)
+                    {
+                        services.AddScoped(interfaceType, resolver);
+                    }
+                }
             }
 
-            services.AddScoped<ILazyListFactory, LazyListFactory>();
-            LazyListFactory.Init(services.BuildServiceProvider);
+            services.AddSingleton<ILazyListFactory>(provider =>
+            {
+                var scope = provider.CreateScope();
+                return new LazyListFactory(scope, scope.ServiceProvider);
+            });
+            
+            var factory = services.BuildServiceProvider().GetService<ILazyListFactory>();
+            LazyListFactory.RegisterInstance(factory);
         }
     }
 }

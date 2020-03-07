@@ -13,60 +13,56 @@ namespace LazyList.Tests.Core
     [CollectionDefinition("LazyListFactory", DisableParallelization = false)]
     public class LazyListFactoryTests : IDisposable
     {
-        private readonly Mock<ILazyLoadResolver> _lazyLoadResolverMock;
+        private readonly Mock<ILazyLoadResolver<IEnumerable<Stub>>> _lazyLoadResolverMock;
         private readonly LazyListFactory _lazyListFactory;
+        private readonly Mock<IDisposable> _disposableScopeMock;
+        private readonly Mock<IServiceProvider> _serviceProviderMock;
 
         public LazyListFactoryTests()
         {
-            _lazyLoadResolverMock = new Mock<ILazyLoadResolver>();
-            _lazyListFactory = new LazyListFactory(new[]
-            {
-                _lazyLoadResolverMock.Object
-            });
+            _lazyLoadResolverMock = new Mock<ILazyLoadResolver<IEnumerable<Stub>>>();
+            _disposableScopeMock = new Mock<IDisposable>();
+            _serviceProviderMock = new Mock<IServiceProvider>();
+            _lazyListFactory = new LazyListFactory(_disposableScopeMock.Object, _serviceProviderMock.Object);
         }
         
         [Fact]
         public void GivenLazyListFactoryWhenCreateAndResolverRegisteredShouldReturnInstance()
         {
-            _lazyLoadResolverMock.SetupGet(x => x.ResolveType)
-                .Returns(typeof(Stub))
+            _serviceProviderMock.Setup(x => x.GetService(typeof(ILazyLoadResolver<IEnumerable<Stub>>)))
+                .Returns(_lazyLoadResolverMock.Object)
                 .Verifiable();
-            
             var list = _lazyListFactory.Create<Stub>(1);
 
             list.Should().NotBeNull();
             list.Should().BeOfType<LazyList<Stub>>();
+            _serviceProviderMock.VerifyAll();
             _lazyLoadResolverMock.VerifyAll();
         }
         
         [Fact]
         public void GivenLazyListFactoryWhenCreateAndResolverNotRegisteredShouldReturnInstance()
         {
-            _lazyLoadResolverMock.SetupGet(x => x.ResolveType)
-                .Returns(typeof(String))
-                .Verifiable();
-            
+            _serviceProviderMock.Setup(x => x.GetService(typeof(ILazyLoadResolver<IEnumerable<Stub>>)))
+                .Returns(_lazyLoadResolverMock.Object);
             var list = _lazyListFactory.Create<Stub>(1);
 
             list.Should().NotBeNull();
             list.Should().BeOfType<LazyList<Stub>>();
-            _lazyLoadResolverMock.VerifyAll();
+            _serviceProviderMock.VerifyAll();
         }
         
         [Fact]
         public void GivenLazyListFactoryWhenStaticCreateShouldReturnInstance()
         {
-            var serviceProvider = new Mock<IServiceProvider>();
-            serviceProvider.Setup(x => x.GetService(typeof(ILazyListFactory)))
-                .Returns(_lazyListFactory)
-                .Verifiable();
-            
-            LazyListFactory.Init(() => serviceProvider.Object);
+            _serviceProviderMock.Setup(x => x.GetService(typeof(ILazyLoadResolver<IEnumerable<Stub>>)))
+                .Returns(_lazyLoadResolverMock.Object);
+            LazyListFactory.RegisterInstance(_lazyListFactory);
             var list = LazyListFactory.CreateList<Stub>(1);
             
             list.Should().NotBeNull();
             list.Should().BeOfType<LazyList<Stub>>();
-            serviceProvider.VerifyAll();
+            _serviceProviderMock.VerifyAll();
         }
         
         [Fact]
@@ -76,24 +72,12 @@ namespace LazyList.Tests.Core
 
             action.Should().Throw<InvalidOperationException>();
         }
-        
-        [Fact]
-        public void GivenLazyListFactoryWhenStaticCreateAndFactoryNotRegisteredShouldThrow()
-        {
-            var serviceProvider = new Mock<IServiceProvider>();
-            serviceProvider.Setup(x => x.GetService(typeof(ILazyListFactory)))
-                .Returns(null)
-                .Verifiable();
-            
-            LazyListFactory.Init(() => serviceProvider.Object);
-            Func<IList<Stub>> action = () => LazyListFactory.CreateList<Stub>(1);
-
-            action.Should().Throw<InvalidOperationException>();
-        }
 
         public void Dispose()
         {
-            LazyListFactory.Init(null);
+            LazyListFactory.RegisterInstance(null);
+            _lazyListFactory.Dispose();
+            _disposableScopeMock.Verify(x => x.Dispose(), Times.Once());
         }
     }
 }

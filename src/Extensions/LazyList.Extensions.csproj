@@ -8,7 +8,7 @@
     <RepositoryUrl>https://github.com/tiagor87/lazy-list</RepositoryUrl>
     <ProjectGuid>{2219CB81-3E6B-4FFF-8C44-1715894609B5}</ProjectGuid>
     <DebugType>Full</DebugType>
-    <TargetFrameworks>net461;net472;netstandard2.0;netstandard2.1</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;netstandard2.1</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>

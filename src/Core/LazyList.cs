@@ -8,10 +8,10 @@ namespace LazyList.Core
         private readonly object _sync = new object();
         private bool _isLoaded;
         private readonly List<T> _list;
-        private readonly ILazyLoadResolver _resolver;
+        private readonly ILazyLoadResolver<IEnumerable<T>> _resolver;
         private readonly LazyLoadParameter _parameter;
 
-        public LazyList(ILazyLoadResolver resolver, LazyLoadParameter parameter = null)
+        public LazyList(ILazyLoadResolver<IEnumerable<T>> resolver, LazyLoadParameter parameter = null)
         {
             _resolver = resolver;
             _parameter = parameter ?? LazyLoadParameter.Null;
@@ -106,7 +106,7 @@ namespace LazyList.Core
             lock (_sync)
             {
                 if (_isLoaded) return;
-                var list = (IEnumerable<T>) _resolver.Resolve(_parameter);
+                var list = _resolver.Resolve(_parameter);
                 _list.InsertRange(0, list);
                 _isLoaded = true;
             }

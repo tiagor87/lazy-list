@@ -5,35 +5,28 @@ using System.Threading.Tasks;
 
 namespace LazyList.Core
 {
-    public abstract class LazyLoadResolver : ILazyLoadResolver
+    public abstract class LazyLoadResolver<T> : ILazyLoadResolver<T>
     {
-        private static readonly object _sync = new object();
-        private readonly IDictionary<LazyLoadParameter, object> _resolvedObjects;
+        private readonly IDictionary<LazyLoadParameter, T> _resolvedObjects;
 
-        protected LazyLoadResolver(Type resolveType)
+        protected LazyLoadResolver()
         {
-            ResolveType = resolveType;
-            _resolvedObjects = new ConcurrentDictionary<LazyLoadParameter, object>();
+            _resolvedObjects = new ConcurrentDictionary<LazyLoadParameter, T>();
         }
-
-        public Type ResolveType { get; }
-        public Task<object> ResolveAsync(LazyLoadParameter parameter)
+        public async Task<T> ResolveAsync(LazyLoadParameter parameter)
         {
             if (parameter == null) throw new ArgumentNullException(nameof(parameter));
-            lock (_sync)
-            {
-                if (_resolvedObjects.TryGetValue(parameter, out var resolved)) return Task.FromResult(resolved);
-                resolved = LoadAsync(parameter).GetAwaiter().GetResult();
-                if (resolved != null) _resolvedObjects.Add(parameter, resolved);
-                return Task.FromResult(resolved);
-            }
+            if (_resolvedObjects.TryGetValue(parameter, out var resolved)) return resolved;
+            resolved = await LoadAsync(parameter);
+            if (resolved != null) _resolvedObjects.Add(parameter, resolved);
+            return resolved;
         }
 
-        public object Resolve(LazyLoadParameter parameter)
+        public T Resolve(LazyLoadParameter parameter)
         {
             return ResolveAsync(parameter).GetAwaiter().GetResult();
         }
 
-        protected abstract Task<object> LoadAsync(LazyLoadParameter parameter);
+        protected abstract Task<T> LoadAsync(LazyLoadParameter parameter);
     }
 }

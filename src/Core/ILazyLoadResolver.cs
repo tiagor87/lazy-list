@@ -1,12 +1,10 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 
 namespace LazyList.Core
 {
-    public interface ILazyLoadResolver
+    public interface ILazyLoadResolver<T>
     {
-        Type ResolveType { get; }
-        Task<object> ResolveAsync(LazyLoadParameter parameter);
-        object Resolve(LazyLoadParameter parameter);
+        Task<T> ResolveAsync(LazyLoadParameter parameter);
+        T Resolve(LazyLoadParameter parameter);
     }
 }

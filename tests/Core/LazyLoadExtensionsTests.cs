@@ -26,9 +26,9 @@ namespace LazyList.Tests.Core
                 .Verifiable();
             var services = _servicesMock.Object;
             
-            services.AddLazyList(typeof(StubLazyLoadResolver).Assembly);
+            services.AddLazyList(typeof(StubLazyLoadResolver<>).Assembly);
             
-            _servicesMock.Verify(x => x.Add(It.Is<ServiceDescriptor>(descriptor => descriptor.ServiceType == typeof(ILazyLoadResolver))), Times.Once());
+            _servicesMock.Verify(x => x.Add(It.Is<ServiceDescriptor>(descriptor => descriptor.ServiceType == typeof(ILazyLoadResolver<>))), Times.Once());
             _servicesMock.Verify(x => x.Add(It.Is<ServiceDescriptor>(descriptor => descriptor.ServiceType == typeof(ILazyListFactory))), Times.Once());
         }
         
@@ -36,21 +36,28 @@ namespace LazyList.Tests.Core
         public void GivenServiceCollectionWhenAddLazyListShouldInitializeFactory()
         {
             var services = new ServiceCollection();
-            services.AddLazyList(typeof(StubLazyLoadResolver).Assembly);
-            var provider = services.BuildServiceProvider();
+            services.AddLazyList(typeof(StubLazyLoadResolver<>).Assembly);
             
-            Func<IList<Stub>> action = () =>
-            {
-                using var _ = provider.CreateScope();
-                return LazyListFactory.CreateList<Stub>(1);
-            };
+            Func<IList<Stub>> action = () => LazyListFactory.CreateList<Stub>(1);
 
             action.Should().NotThrow();
         }
 
+        [Fact]
+        public void GivenServiceCollectionWhenAddLazyListShouldRegisterOpenTypeGenericsAndSpecificTypes()
+        {
+            var services = new ServiceCollection();
+            services.AddLazyList(typeof(StubLazyLoadResolver<>).Assembly);
+
+            var stubs = LazyListFactory.CreateList<Stub>(1);
+
+            stubs.Should().NotBeNull();
+            stubs.Should().BeOfType<LazyList<Stub>>();
+        }
+
         public void Dispose()
         {
-            LazyListFactory.Init(null);
+            LazyListFactory.RegisterInstance(null);
         }
     }
 }

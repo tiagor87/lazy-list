@@ -1,4 +1,5 @@
-﻿using FluentAssertions;
+﻿using System.Collections.Generic;
+using FluentAssertions;
 using LazyList.Core;
 using Moq;
 using Xunit;
@@ -7,11 +8,11 @@ namespace LazyList.Tests.Core
 {
     public class LazyListTests
     {
-        private readonly Mock<ILazyLoadResolver> _lazyLoadResolverMock;
+        private readonly Mock<ILazyLoadResolver<IEnumerable<Stub>>> _lazyLoadResolverMock;
 
         public LazyListTests()
         {
-            _lazyLoadResolverMock = new Mock<ILazyLoadResolver>();
+            _lazyLoadResolverMock = new Mock<ILazyLoadResolver<IEnumerable<Stub>>>();
         }
         
         [Fact]

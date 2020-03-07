@@ -1,49 +1,54 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace LazyList.Core
 {
-    public class LazyListFactory : ILazyListFactory
+    public class LazyListFactory : ILazyListFactory, IDisposable
     {
-        private static Func<IServiceProvider> _serviceProviderGetter;
-        private static IServiceProvider _serviceProvider;
-        private readonly IReadOnlyList<ILazyLoadResolver> _resolvers;
+        private static ILazyListFactory _instance;
+        private readonly IDisposable _scope;
+        private readonly IServiceProvider _provider;
+        private bool _disposed;
 
-        public LazyListFactory(IEnumerable<ILazyLoadResolver> resolvers)
+        public LazyListFactory(IDisposable scope, IServiceProvider provider)
         {
-            _resolvers = resolvers.ToList();
+            _scope = scope;
+            _provider = provider;
         }
 
         public IList<T> Create<T>(LazyLoadParameter parameter)
         {
-            var resolver = _resolvers.FirstOrDefault(x => x.ResolveType == typeof(T));
+            var resolver = (ILazyLoadResolver<IEnumerable<T>>) _provider.GetService(typeof(ILazyLoadResolver<IEnumerable<T>>));
             return new LazyList<T>(resolver, parameter);
         }
 
         public static IList<T> CreateList<T>(object parameter)
         {
-            if (ServiceProvider == null) throw new InvalidOperationException("Service Provider is required to execute static creation. Call Init method on Startup.");
-            
-            var factory = ServiceProvider.GetService(typeof(ILazyListFactory)) as ILazyListFactory;
-            if (factory == null) throw new InvalidOperationException($"The {nameof(ILazyListFactory)} is not registered.");
-            return factory.Create<T>(new LazyLoadParameter(parameter));
+            if (_instance == null) throw new InvalidOperationException($"There is not instance for {nameof(ILazyListFactory)}.");
+            return _instance.Create<T>(new LazyLoadParameter(parameter));
         }
 
-        public static void Init(Func<IServiceProvider> serviceProviderGetter)
+        public static void RegisterInstance(ILazyListFactory lazyListFactory)
         {
-            _serviceProviderGetter = serviceProviderGetter;
-            _serviceProvider = null;
+            _instance = lazyListFactory;
         }
 
-        private static IServiceProvider ServiceProvider
+        ~LazyListFactory()
         {
-            get
-            {
-                if (_serviceProvider != null) return _serviceProvider;
-                if (_serviceProviderGetter == null) return null;
-                return _serviceProvider = _serviceProviderGetter();
-            }
+            Dispose(false);
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        private void Dispose(bool disposing)
+        {
+            if (_disposed) return;
+            if (disposing) _scope.Dispose();
+            _disposed = true;
         }
     }
 }

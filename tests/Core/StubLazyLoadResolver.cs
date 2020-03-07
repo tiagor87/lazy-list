@@ -1,20 +1,31 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using LazyList.Core;
 
 namespace LazyList.Tests.Core
 {
-    public class StubLazyLoadResolver : ILazyLoadResolver
+    public class StubLazyLoadResolver<T> : ILazyLoadResolver<T> where T : class
     {
-        public Type ResolveType { get; }
-        public Task<object> ResolveAsync(LazyLoadParameter parameter)
+        public Task<T> ResolveAsync(LazyLoadParameter parameter)
         {
-            throw new NotImplementedException();
+            return Task.FromResult((T) null);
         }
 
-        public object Resolve(LazyLoadParameter parameter)
+        public T Resolve(LazyLoadParameter parameter)
         {
-            throw new NotImplementedException();
+            return null;
+        }
+    }
+    
+    public class Stub2LazyLoadResolver : ILazyLoadResolver<Stub>
+    {
+        public Task<Stub> ResolveAsync(LazyLoadParameter parameter)
+        {
+            return Task.FromResult((Stub) null);
+        }
+
+        public Stub Resolve(LazyLoadParameter parameter)
+        {
+            return null;
         }
     }
 }

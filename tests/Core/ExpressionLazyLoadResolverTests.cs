@@ -22,7 +22,7 @@ namespace LazyList.Tests.Core
         public async Task GivenLazyLoadWhenResolveInParallelTasksShouldReturnSameInstance()
         {
             var resolver = new ExpressionLazyLoadResolver<Stub>((_) => Task.FromResult(new Stub()));
-            var tasks = new List<Task<object>>();
+            var tasks = new List<Task<Stub>>();
             for (var i = 0; i < 10000; i++)
             {
                 tasks.Add(resolver.ResolveAsync(1));
