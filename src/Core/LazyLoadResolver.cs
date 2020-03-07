@@ -13,13 +13,11 @@ namespace LazyList.Core
         {
             _resolvedObjects = new ConcurrentDictionary<LazyLoadParameter, T>();
         }
-        public async Task<T> ResolveAsync(LazyLoadParameter parameter)
+        public Task<T> ResolveAsync(LazyLoadParameter parameter)
         {
             if (parameter == null) throw new ArgumentNullException(nameof(parameter));
-            if (_resolvedObjects.TryGetValue(parameter, out var resolved)) return resolved;
-            resolved = await LoadAsync(parameter);
-            if (resolved != null) _resolvedObjects.Add(parameter, resolved);
-            return resolved;
+            if (_resolvedObjects.TryGetValue(parameter, out var resolved)) return Task.FromResult(resolved);
+            return InternalResolveAsync(parameter);
         }
 
         public T Resolve(LazyLoadParameter parameter)
@@ -28,5 +26,12 @@ namespace LazyList.Core
         }
 
         protected abstract Task<T> LoadAsync(LazyLoadParameter parameter);
+
+        private async Task<T> InternalResolveAsync(LazyLoadParameter parameter)
+        {
+            var resolved = await LoadAsync(parameter);
+            if (resolved != null) _resolvedObjects.Add(parameter, resolved);
+            return resolved;
+        }
     }
 }
